@@ -1,14 +1,13 @@
-import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy.stats import linregress
 import pprint
+import tqdm
 
 import json
 
 # READIN FUNCTIONS
-
 
 def path_to_xlsx(path):
     import os
@@ -34,6 +33,22 @@ def excel_to_pandas(_file: str) -> dict:
     """
     try:
         dfs = pd.read_excel(_file, sheet_name=None, skiprows=0)
+        worksheets = list(dfs)
+
+        dfs = dict()
+
+        for worksheet in tqdm.tqdm(worksheets):
+            try: 
+                for n in range(200):
+                    df = pd.read_excel(_file, sheet_name=worksheet, skiprows=n)
+                    if 'Time [s]' in list(df):
+                        print(worksheet, n)
+                        dfs[worksheet] = pd.read_excel(_file, sheet_name=worksheet, skiprows=n)
+                        break
+            except:
+                print('couldnt resolve worksheet {}'.format(worksheet))
+
+
     except:
         raise ImportError('Could not import excel files. Please make sure every worksheet starts with the column names without the comment section. OR wrong filename Error above?')
     
@@ -223,7 +238,11 @@ def plot_assays_and_slopes(dfs1, groups, slopes, errslo, exclude=[]):
 
 
 # CABP: 
-def analyse_cabp_slopes(dfs1, groups, cabp_mol, slopes, errslo,):
+def analyse_cabp_slopes(dfs1,
+                        groups,
+                        cabp_mol,
+                        slopes,
+                        errslo):
 
     cabp_slopes = dict()
     for assay in list(cabp_mol):
@@ -264,12 +283,12 @@ def plot_cabp_slopes(cabp_slopes,
     exclude         = list of string with assays or enzymes to exclude plotting
     plot_all_slopes = plots the histogram of all collected slope data from previous analysis
     '''
-    
+
     for assay in list(cabp_slopes):
         if assay not in exclude:
             for enzyme in list(cabp_slopes[assay]):
                 if enzyme not in exclude:
-                    
+
                     _max_wells = list()
 
                     _look_for_max_conc = [cabp_mol[assay][enzyme][well] for well in list(cabp_slopes[assay][enzyme])]
@@ -282,14 +301,14 @@ def plot_cabp_slopes(cabp_slopes,
                     _max_conc_slope = np.mean([cabp_slopes[assay][enzyme][n][0] for n in _max_wells])
 
 
-                    
+
                     wells_to_analyse = list(cabp_slopes[assay][enzyme])
                     for n in _max_wells:
                         wells_to_analyse.remove(n)
-                    
+
                     plt.figure(figsize=(10,7))
                     plt.title(assay + ' | ' + enzyme  )
-                    
+
                     for well in wells_to_analyse:
                         if plot_all_slopes == True:
                             plt.scatter(np.array(np.ones(len(cabp_slopes[assay][enzyme][well][1]))*cabp_mol[assay][enzyme][well]),
@@ -298,26 +317,26 @@ def plot_cabp_slopes(cabp_slopes,
                         else:
                             plt.scatter(cabp_mol[assay][enzyme][well], 
                                         -1*cabp_slopes[assay][enzyme][well][0] - _max_conc_slope, label = well + '|{}µmol'.format(cabp_mol[assay][enzyme][well]))
-                    
-                    
+
+
                     # plot the knockout concentration: 
                     for well in _max_wells:
                         plt.scatter(np.array(np.ones(len(cabp_slopes[assay][enzyme][well][1]))*cabp_mol[assay][enzyme][well]),
                                         -1*(np.array(cabp_slopes[assay][enzyme][well][1]) - _max_conc_slope), alpha=0.3,
                                         label = well + '|{}µmol'.format(cabp_mol[assay][enzyme][well]))
-                    
-                    
+
+
                     # lin reg: 
                     x = [cabp_mol[assay][enzyme][t] for t in wells_to_analyse]
                     y = np.array([cabp_slopes[assay][enzyme][t][0] - _max_conc_slope for t in wells_to_analyse])*-1
 
                     result = linregress(x, y)
-                    
-                    xplot = np.linspace(0,_max_conc,1000)
+
+                    xplot = np.linspace(0, _max_conc, 1000)
                     yplot = result.slope*np.array(xplot) + result.intercept
-                    
+
                     xintercept_index = np.argmin(np.diff(np.sign(yplot)))
-                    
+
                     plt.plot(xplot, yplot, color = 'grey', linestyle = 'dashed')
                     plt.scatter(xplot[xintercept_index], yplot[xintercept_index],color = 'black', marker='x',
                                label = 'x intercept')
@@ -329,7 +348,6 @@ def plot_cabp_slopes(cabp_slopes,
                     plt.legend()
                     plt.grid()
                     plt.show()
-
 
 
 
