@@ -153,10 +153,12 @@ def check_dataframe(dfs):
 
 # ANALYSIS: 
 
-def analyse_all(dfs, interval:int = 100, time0:bool = True) -> dict:
+def analyse_all(dfs, interval:int = 100, time0:bool = True, endtime:int = None) -> dict:
     '''
     interval = interval in seconds for slope analysis 
     dubtrip  = dublicate or triplete data given, it seperates t
+    time0 = start time of analysis, if true its starts after reaction starts but we can also give a number
+    endtime = time in seconds where analysis ends
     '''
 
     all_slopes = dict()
@@ -169,9 +171,9 @@ def analyse_all(dfs, interval:int = 100, time0:bool = True) -> dict:
             header.remove(t)
         new_header = header.copy()
         new_header.insert(0,'Time [s]')
-        
+
+        # timewise slicing
         df_sliced = dfs[assay]
-        
         if time0 == True:
             time0_ = get_time_zero(dfs[assay])
             df_sliced = df_sliced[df_sliced['Time [s]'] > time0_]
@@ -182,7 +184,16 @@ def analyse_all(dfs, interval:int = 100, time0:bool = True) -> dict:
             except:
                 time0_ = 0
                 df_sliced = dfs[assay]
-        
+
+        if endtime == None:
+            df_sliced = df_sliced
+        else:
+            try:
+                endtime_ = endtime
+                df_sliced = df_sliced[df_sliced['Time [s]'] < endtime_]
+            except:
+                print('couldnt slice endtime of experiment. analysis ending at {}s'.format(df_sliced['Time [s]']))     
+
         _all_slopes = list()
         _all_errors = list()
         # slice from start to end point in seconds:
