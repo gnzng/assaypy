@@ -9,3 +9,5 @@ __pycache__
 assaypy.egg-info/
 
 dist/
+
+1_example.ipynb

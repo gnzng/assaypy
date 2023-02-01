@@ -51,7 +51,7 @@ def excel_to_pandas(_file: str) -> dict:
 
     except:
         raise ImportError('Could not import excel files. Please make sure every worksheet starts with the column names without the comment section. OR wrong filename Error above?')
-    
+
     for n in dfs:
         dfs[n] = dfs[n].dropna()
         dfs[n] = dfs[n].astype({'Time [s]': 'float'})
@@ -74,27 +74,69 @@ def attach_dubtrip(dfs1):
     return dubtrip
 
 
-def group_wells(dfs, dubtrip):
+def group_wells(dfs, dubtrip, mode='A1-A2'):
     print('grouping wells with provided dubtrip data:')
     print('   ')
     pprint.pprint(dubtrip)
     print('   ')
-    groups = dict()
-    for n in list(dfs):
-        groups[n] = dict()
-        print(n)
-        ct = 0
-        _ = list()
-        for i in  list(dfs[n]):
-            if i not in ['Cycle Nr.', 'Time [s]', 'CO2 %', 'O2 %', 'Temp. [°C]']:
-                _.append(i)
-                ct += 1
-                if ct == dubtrip[n]:
-                    print('-'.join(_))
-                    groups[n]['-'.join(_)] = _
-                    ct = 0
-                    _ = list()
-        print(' ')
+    if mode == 'A1-A2':
+        groups = dict()
+        for n in list(dfs):
+            groups[n] = dict()
+            ct = 0
+            _ = list()
+            for i in  list(dfs[n]):
+                if i not in ['Cycle Nr.', 'Time [s]', 'CO2 %', 'O2 %', 'Temp. [°C]']:
+                    _.append(i)
+                    ct += 1
+                    if ct == dubtrip[n]:
+                        print('-'.join(_))
+                        groups[n]['-'.join(_)] = _
+                        ct = 0
+                        _ = list()
+            print(' ')
+
+    elif mode == 'A1-B1':
+        groups = dict()
+        for n in list(dfs):
+            groups[n] = dict()
+            to_reshape = list(dfs[n])
+            for rm in ['Cycle Nr.', 'Time [s]', 'CO2 %', 'O2 %', 'Temp. [°C]']:
+                try:
+                    to_reshape.remove(rm)
+                except:
+                    pass
+
+            _ = list()
+            _list = list()
+            for i in range(len(to_reshape)-1):
+                startswith = to_reshape[i][0]
+                next_startswith = to_reshape[i+1][0]
+                if startswith == next_startswith:
+                    _list.append(to_reshape[i])
+                    if i == len(to_reshape)-2:
+                        _list.append(to_reshape[i+1])
+                        _.append(_list)           
+                else:
+                    _list.append(to_reshape[i])
+                    _.append(_list)
+                    _list = list()
+            reshaped = np.array(_).T.reshape(int(len(to_reshape)/dubtrip[n]),dubtrip[n]).flatten()
+            ct = 0 
+            _ = list()
+            for i in  reshaped:
+                if i not in ['Cycle Nr.', 'Time [s]', 'CO2 %', 'O2 %', 'Temp. [°C]']:
+                    _.append(i)
+                    ct += 1
+                    if ct == dubtrip[n]:
+                        print('-'.join(_))
+                        groups[n]['-'.join(_)] = _
+                        ct = 0
+                        _ = list()
+            print(' ')
+
+    else:
+        raise ValueError('grouping mode not clear')
     return groups
 
 
@@ -108,7 +150,7 @@ def attach_cabp_mol(groups):
             for gr in list(groups[assay_name]):
                 cabp_mol[assay_name][gr] = float(input('mol for {}?  '.format(gr)))
     # export to json:
-    
+
     save = input('save? (Y/n)')
     if save == 'Y':
         with open(input('save as filename (json): ') + '.json', "w") as outfile:
@@ -243,6 +285,8 @@ def plot_assays_and_slopes(dfs1, groups, slopes, errslo, exclude=[]):
                     ax2.set_xlabel('Time [s]')
                     ax1.set_ylabel('absorbance')
                     ax2.set_ylabel('slope')
+                    ax1.grid()
+                    ax2.grid()
                     plt.legend()
                     plt.show()
 
