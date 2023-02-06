@@ -9,6 +9,7 @@ import json
 
 # READIN FUNCTIONS
 
+
 def path_to_xlsx(path):
     import os
     if os.path.exists(path) is True:
@@ -24,6 +25,7 @@ def path_to_xlsx(path):
 
         return filename
 
+
 def excel_to_pandas(_file: str) -> dict:
     """
     return pandas dataframes workbook by workbooks for main data.
@@ -38,18 +40,17 @@ def excel_to_pandas(_file: str) -> dict:
         dfs = dict()
 
         for worksheet in tqdm.tqdm(worksheets):
-            try: 
+            try:
                 for n in range(200):
                     df = pd.read_excel(_file, sheet_name=worksheet, skiprows=n)
                     if 'Time [s]' in list(df):
                         print(worksheet, n)
                         dfs[worksheet] = pd.read_excel(_file, sheet_name=worksheet, skiprows=n)
                         break
-            except:
+            except Exception:
                 print('couldnt resolve worksheet {}'.format(worksheet))
 
-
-    except:
+    except Exception:
         raise ImportError('Could not import excel files. Please make sure every worksheet starts with the column names without the comment section. OR wrong filename Error above?')
 
     for n in dfs:
@@ -69,7 +70,7 @@ def attach_dubtrip(dfs1):
     print(' ')
     print('final:')
     print('')
-    
+
     pprint.pprint(dubtrip)
     return dubtrip
 
@@ -85,7 +86,7 @@ def group_wells(dfs, dubtrip, mode='A1-A2'):
             groups[n] = dict()
             ct = 0
             _ = list()
-            for i in  list(dfs[n]):
+            for i in list(dfs[n]):
                 if i not in ['Cycle Nr.', 'Time [s]', 'CO2 %', 'O2 %', 'Temp. [°C]']:
                     _.append(i)
                     ct += 1
@@ -104,7 +105,7 @@ def group_wells(dfs, dubtrip, mode='A1-A2'):
             for rm in ['Cycle Nr.', 'Time [s]', 'CO2 %', 'O2 %', 'Temp. [°C]']:
                 try:
                     to_reshape.remove(rm)
-                except:
+                except Exception:
                     pass
 
             _ = list()
@@ -116,15 +117,15 @@ def group_wells(dfs, dubtrip, mode='A1-A2'):
                     _list.append(to_reshape[i])
                     if i == len(to_reshape)-2:
                         _list.append(to_reshape[i+1])
-                        _.append(_list)           
+                        _.append(_list)
                 else:
                     _list.append(to_reshape[i])
                     _.append(_list)
                     _list = list()
-            reshaped = np.array(_).T.reshape(int(len(to_reshape)/dubtrip[n]),dubtrip[n]).flatten()
-            ct = 0 
+            reshaped = np.array(_).T.reshape(int(len(to_reshape)/dubtrip[n]), dubtrip[n]).flatten()
+            ct = 0
             _ = list()
-            for i in  reshaped:
+            for i in reshaped:
                 if i not in ['Cycle Nr.', 'Time [s]', 'CO2 %', 'O2 %', 'Temp. [°C]']:
                     _.append(i)
                     ct += 1
@@ -156,18 +157,17 @@ def attach_cabp_mol(groups):
         with open(input('save as filename (json): ') + '.json', "w") as outfile:
             json.dump(cabp_mol, outfile)
         print('saved')
-    else: 
+    else:
         pass
     return cabp_mol
 
 
-def change_assay_dubtrip(dfs1,dubtrip):
-    try: 
-
+def change_assay_dubtrip(dfs1, dubtrip):
+    try:
         change_assay = input('which assay do you want to change? ')
         if change_assay in list(dfs1):
             dubtrip[change_assay] = int(input('to what? '))
-            print(change_assay, ' set to ' , dubtrip[change_assay])
+            print(change_assay, ' set to ', dubtrip[change_assay])
             print('now:')
             print('')
             pprint.pprint(dubtrip)
@@ -177,27 +177,29 @@ def change_assay_dubtrip(dfs1,dubtrip):
             print('still:')
             print('')
             pprint.pprint(dubtrip)
-            
-    except:
+
+    except Exception:
         raise SyntaxError('error while handling data. repeat the previous steps. ')
 
 
-# CHECKS and TESTS: 
+# CHECKS and TESTS:
+
 
 def check_dataframe(dfs):
     number_of_to_show = 9
     for n in dfs:
         print('Worksheet name: ', n)
-        print(dfs[n].describe().iloc[:,:number_of_to_show])
+        print(dfs[n].describe().iloc[:, :number_of_to_show])
         print('-------------------------------------------')
         print('-------------------------------------------')
 
 
-# ANALYSIS: 
+# ANALYSIS:
 
-def analyse_all(dfs, interval:int = 100, time0:bool = True, endtime:int = None) -> dict:
+
+def analyse_all(dfs, interval: int = 100, time0: bool = True, endtime: int = None) -> dict:
     '''
-    interval = interval in seconds for slope analysis 
+    interval = interval in seconds for slope analysis
     dubtrip  = dublicate or triplete data given, it seperates t
     time0 = start time of analysis, if true its starts after reaction starts but we can also give a number
     endtime = time in seconds where analysis ends
@@ -207,34 +209,34 @@ def analyse_all(dfs, interval:int = 100, time0:bool = True, endtime:int = None) 
     all_errors = dict()
 
     # make regression for all assays:
-    for assay in dfs: 
+    for assay in dfs:
         header = list(dfs[assay])
         for t in ['Cycle Nr.', 'Time [s]', 'CO2 %', 'O2 %', 'Temp. [°C]']:
             header.remove(t)
         new_header = header.copy()
-        new_header.insert(0,'Time [s]')
+        new_header.insert(0, 'Time [s]')
 
         # timewise slicing
         df_sliced = dfs[assay]
-        if time0 == True:
+        if time0 is True:
             time0_ = get_time_zero(dfs[assay])
             df_sliced = df_sliced[df_sliced['Time [s]'] > time0_]
         else:
             try:
                 time0_ = time0
                 df_sliced = df_sliced[df_sliced['Time [s]'] > time0_]
-            except:
+            except Exception:
                 time0_ = 0
                 df_sliced = dfs[assay]
 
-        if endtime == None:
+        if endtime is None:
             df_sliced = df_sliced
         else:
             try:
                 endtime_ = endtime
                 df_sliced = df_sliced[df_sliced['Time [s]'] < endtime_]
-            except:
-                print('couldnt slice endtime of experiment. analysis ending at {}s'.format(df_sliced['Time [s]']))     
+            except Exception:
+                print('couldnt slice endtime of experiment. analysis ending at {}s'.format(df_sliced['Time [s]']))
 
         _all_slopes = list()
         _all_errors = list()
@@ -252,16 +254,17 @@ def analyse_all(dfs, interval:int = 100, time0:bool = True, endtime:int = None) 
                     result = linregress(x, y)
                     _slope.append(result.slope)
                     _error.append(result.stderr)
-                _slope.insert(0,float(tt*interval+time0_))
-                _error.insert(0,float(tt*interval+time0_))
-            except:
-                pass #print('wasnt working')
-            
+                _slope.insert(0, float(tt*interval+time0_))
+                _error.insert(0, float(tt*interval+time0_))
+            except Exception:
+                pass
+
             _all_slopes.append(_slope)
             _all_errors.append(_error)
-        all_slopes[assay] = pd.DataFrame(_all_slopes,columns=new_header).dropna()
-        all_errors[assay] = pd.DataFrame(_all_errors,columns=new_header).dropna()
+        all_slopes[assay] = pd.DataFrame(_all_slopes, columns=new_header).dropna()
+        all_errors[assay] = pd.DataFrame(_all_errors, columns=new_header).dropna()
     return all_slopes, all_errors
+
 
 def plot_assays_and_slopes(dfs1, groups, slopes, errslo, exclude=[]):
     '''
@@ -279,8 +282,12 @@ def plot_assays_and_slopes(dfs1, groups, slopes, errslo, exclude=[]):
                     f, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
                     plt.title(assay_to_plot + ' | ' + n)
                     for m in groups[assay_to_plot][n]:
-                        ax1.plot(dfs1[assay_to_plot]['Time [s]'],dfs1[assay_to_plot][m])
-                        ax2.errorbar(slopes[assay_to_plot]['Time [s]'], slopes[assay_to_plot][m],errslo[assay_to_plot][m],label = m)
+                        ax1.plot(dfs1[assay_to_plot]['Time [s]'],
+                                 dfs1[assay_to_plot][m])
+                        ax2.errorbar(slopes[assay_to_plot]['Time [s]'],
+                                     slopes[assay_to_plot][m],
+                                     errslo[assay_to_plot][m],
+                                     label=m)
                     plt.tight_layout()
                     ax2.set_xlabel('Time [s]')
                     ax1.set_ylabel('absorbance')
@@ -291,8 +298,7 @@ def plot_assays_and_slopes(dfs1, groups, slopes, errslo, exclude=[]):
                     plt.show()
 
 
-
-# CABP: 
+# CABP:
 def analyse_cabp_slopes(dfs1,
                         groups,
                         cabp_mol,
@@ -308,30 +314,34 @@ def analyse_cabp_slopes(dfs1,
                 for well in list(groups[assay][wellpair]):
                     if well in list(cabp_mol[assay][enzyme]):
                         plt.figure()
-                        plt.title(enzyme + ' | ' + assay + ' | ' +  str(cabp_mol[assay][enzyme][well])  + 'mMol')
+                        plt.title(enzyme + ' | ' + assay + ' | ' + str(cabp_mol[assay][enzyme][well]) + 'mMol')
                         plt.errorbar(slopes[assay]['Time [s]'],
                                      slopes[assay][well],
-                                     errslo[assay][well], label = well)
+                                     errslo[assay][well],
+                                     label=well)
 
                         f = slopes[assay][slopes[assay]['Time [s]'] > get_time_zero(dfs1[assay])]
                         fall = np.array(f[well])[:-1]
                         fmean = np.mean(np.array(f[well])[:-1])
-                        cabp_slopes[assay][enzyme][well] = (fmean,list(fall))
-                        plt.plot([get_time_zero(dfs1[assay]),np.max(f['Time [s]'])],[fmean,fmean],
-                                 label = well + 'mean: ' + str(np.around(np.mean(f[well]),8)))
+                        cabp_slopes[assay][enzyme][well] = (fmean, list(fall))
+                        plt.plot([get_time_zero(dfs1[assay]),
+                                 np.max(f['Time [s]'])],
+                                 [fmean, fmean],
+                                 label=well + 'mean: ' + str(np.around(np.mean(f[well]), 8)))
 
-                        plt.plot([get_time_zero(dfs1[assay]),get_time_zero(dfs1[assay])],
-                             [np.min(slopes[assay][well]),np.max(slopes[assay][well])],
-                             color='grey',label='time 0')
+                        plt.plot([get_time_zero(dfs1[assay]), get_time_zero(dfs1[assay])],
+                                 [np.min(slopes[assay][well]), np.max(slopes[assay][well])],
+                                 color='grey', label='time 0')
                         plt.legend()
                         plt.show()
     return cabp_slopes
 
 
-def plot_cabp_slopes(cabp_slopes, 
-                     cabp_mol, exclude = [], 
-                     plot_all_slopes = True
-                    ):
+def plot_cabp_slopes(cabp_slopes,
+                     cabp_mol,
+                     exclude=[],
+                     plot_all_slopes=True
+                     ):
     '''
     cabp_slopes     = dict with dA/dt data of the measured wells
     cabp_mol        = dict with concentration data for the measured wells usually in µMol
@@ -347,7 +357,7 @@ def plot_cabp_slopes(cabp_slopes,
                     _max_wells = list()
 
                     _look_for_max_conc = [cabp_mol[assay][enzyme][well] for well in list(cabp_slopes[assay][enzyme])]
-                    _max_conc  = np.max(_look_for_max_conc)
+                    _max_conc = np.max(_look_for_max_conc)
 
                     for well in list(cabp_slopes[assay][enzyme]):
                         if cabp_mol[assay][enzyme][well] == _max_conc:
@@ -355,33 +365,28 @@ def plot_cabp_slopes(cabp_slopes,
 
                     _max_conc_slope = np.mean([cabp_slopes[assay][enzyme][n][0] for n in _max_wells])
 
-
-
                     wells_to_analyse = list(cabp_slopes[assay][enzyme])
                     for n in _max_wells:
                         wells_to_analyse.remove(n)
 
-                    plt.figure(figsize=(10,7))
-                    plt.title(assay + ' | ' + enzyme  )
-
+                    plt.figure(figsize=(10, 7))
+                    plt.title(assay + ' | ' + enzyme)
                     for well in wells_to_analyse:
-                        if plot_all_slopes == True:
+                        if plot_all_slopes is True:
                             plt.scatter(np.array(np.ones(len(cabp_slopes[assay][enzyme][well][1]))*cabp_mol[assay][enzyme][well]),
                                         -1*(np.array(cabp_slopes[assay][enzyme][well][1]) - _max_conc_slope), alpha=0.3,
-                                        label = well + '|{}µmol'.format(cabp_mol[assay][enzyme][well]))
+                                        label=well + '|{}µmol'.format(cabp_mol[assay][enzyme][well]))
                         else:
-                            plt.scatter(cabp_mol[assay][enzyme][well], 
-                                        -1*cabp_slopes[assay][enzyme][well][0] - _max_conc_slope, label = well + '|{}µmol'.format(cabp_mol[assay][enzyme][well]))
+                            plt.scatter(cabp_mol[assay][enzyme][well],
+                                        -1*cabp_slopes[assay][enzyme][well][0] - _max_conc_slope, label=well + '|{}µmol'.format(cabp_mol[assay][enzyme][well]))
 
-
-                    # plot the knockout concentration: 
+                    # plot the knockout concentration:
                     for well in _max_wells:
                         plt.scatter(np.array(np.ones(len(cabp_slopes[assay][enzyme][well][1]))*cabp_mol[assay][enzyme][well]),
-                                        -1*(np.array(cabp_slopes[assay][enzyme][well][1]) - _max_conc_slope), alpha=0.3,
-                                        label = well + '|{}µmol'.format(cabp_mol[assay][enzyme][well]))
+                                    -1*(np.array(cabp_slopes[assay][enzyme][well][1]) - _max_conc_slope), alpha=0.3,
+                                    label=well + '|{}µmol'.format(cabp_mol[assay][enzyme][well]))
 
-
-                    # lin reg: 
+                    # lin reg:
                     x = [cabp_mol[assay][enzyme][t] for t in wells_to_analyse]
                     y = np.array([cabp_slopes[assay][enzyme][t][0] - _max_conc_slope for t in wells_to_analyse])*-1
 
@@ -392,19 +397,17 @@ def plot_cabp_slopes(cabp_slopes,
 
                     xintercept_index = np.argmin(np.diff(np.sign(yplot)))
 
-                    plt.plot(xplot, yplot, color = 'grey', linestyle = 'dashed')
-                    plt.scatter(xplot[xintercept_index], yplot[xintercept_index],color = 'black', marker='x',
-                               label = 'x intercept')
-                    print('xintercept',xplot[xintercept_index])
-                    print('rvalue^2',result.rvalue**2)
-                    print('baseline',_max_conc_slope)
+                    plt.plot(xplot, yplot, color='grey', linestyle='dashed')
+                    plt.scatter(xplot[xintercept_index], yplot[xintercept_index], color='black', marker='x',
+                                label='x intercept')
+                    print('xintercept', xplot[xintercept_index])
+                    print('rvalue^2', result.rvalue**2)
+                    print('baseline', _max_conc_slope)
                     plt.xlabel('concentration [µMol]')
                     plt.ylabel('absorption change [arb. units/s]')
                     plt.legend()
                     plt.grid()
                     plt.show()
-
-
 
 
 # UTIL FUNCTIONS:
@@ -414,11 +417,11 @@ def print_data_structure(dfs):
     for n in list(dfs):
         _ = list()
         print(n)
-        for i in  list(dfs[n]):
+        for i in list(dfs[n]):
             if i not in ['Cycle Nr.', 'Time [s]', 'CO2 %', 'O2 %', 'Temp. [°C]']:
                 _.append(i)
         print(_)
-        print('number of columns:',len(_))
+        print('number of columns:', len(_))
         print('  ')
 
 
@@ -428,4 +431,3 @@ def get_time_zero(df):
     diffs = np.diff(times)
     max_diffs = np.argmax(diffs)
     return times[max_diffs+1]
-

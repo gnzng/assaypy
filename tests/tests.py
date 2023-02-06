@@ -14,13 +14,14 @@ def test_import():
     current_directory = os.path.split(path_to_current_file)[0]
     print(current_directory)
     path_to_file = current_directory + '/testfiles/221222 Orange and Lime Run corrected.xlsx'
-    assay_run_1 =  path_to_xlsx(path_to_file)
+    assay_run_1 = path_to_xlsx(path_to_file)
     print('using assays xlsx file: ', assay_run_1)
+
 
 path_to_current_file = os.path.realpath(__file__)
 current_directory = os.path.split(path_to_current_file)[0]
 path_to_file = current_directory + '/testfiles/221222 Orange and Lime Run corrected.xlsx'
-assay_run_1 =  path_to_xlsx(path_to_file)
+assay_run_1 = path_to_xlsx(path_to_file)
 
 
 # test pandas dataframe
@@ -40,8 +41,6 @@ def test_pd():
         assert isinstance(dfs1[worksheet], pd.DataFrame)
 
 
-
-
 def test_print_data_structure():
     print_data_structure(dfs1)
 
@@ -52,10 +51,17 @@ def test_print_data_structure():
 def test_attach_dubtrip_and_groups():
     dubtrip = attach_dubtrip(dfs1)
     change_assay_dubtrip(dfs1, dubtrip)
-    groups = group_wells(dfs1, dubtrip)
+    # groups =
+    group_wells(dfs1, dubtrip)
+
+
+test_attach_dubtrip_and_groups()
 
 
 def test_analyse_all():
-    analyse = analyse_all(dfs1, interval = 300, time0 = True)
-    slopes = analyse[0]
-    errslo = analyse[1]
+    return analyse_all(dfs1, interval=300, time0=True)
+    # slopes = analyse[0]
+    # errslo = analyse[1]
+
+
+test_analyse_all()
