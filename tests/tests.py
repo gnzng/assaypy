@@ -13,14 +13,14 @@ def test_import():
     path_to_current_file = os.path.realpath(__file__)
     current_directory = os.path.split(path_to_current_file)[0]
     print(current_directory)
-    path_to_file = current_directory + '/testfiles/221222 Orange and Lime Run corrected.xlsx'
+    path_to_file = current_directory + '/testfiles/221222 Orange and Lime Run corrected_A1B1.xlsx'
     assay_run_1 = path_to_xlsx(path_to_file)
     print('using assays xlsx file: ', assay_run_1)
 
 
 path_to_current_file = os.path.realpath(__file__)
 current_directory = os.path.split(path_to_current_file)[0]
-path_to_file = current_directory + '/testfiles/221222 Orange and Lime Run corrected.xlsx'
+path_to_file = current_directory + '/testfiles/221222 Orange and Lime Run corrected_A1B1.xlsx'
 assay_run_1 = path_to_xlsx(path_to_file)
 
 
@@ -55,13 +55,7 @@ def test_attach_dubtrip_and_groups():
     group_wells(dfs1, dubtrip)
 
 
-test_attach_dubtrip_and_groups()
-
-
 def test_analyse_all():
-    return analyse_all(dfs1, interval=300, time0=True)
+    assert analyse_all(dfs1, interval=300, time0=True)
     # slopes = analyse[0]
     # errslo = analyse[1]
-
-
-test_analyse_all()
