@@ -1,20 +1,18 @@
 from distutils.core import setup
-__authors__  = 'Damian Guenzing'
-
+__authors__ = 'Damian Guenzing'
 __version__ = '0.0.5'
 
-
 setup(
-  name = 'assaypy',
-  packages = ['assaypy'],
-  version = __version__,
-  license='MIT',        
-  description = 'package for analysis of experimental assay data',
-  author = __authors__,
-  author_email = 'gnzng@protonmail.ch',
-  url = 'https://github.com/gnzng/',
-  keywords = ['assay'],
-  install_requires=[ 
+  name='assaypy',
+  packages=['assaypy'],
+  version=__version__,
+  license='MIT',
+  description='package for analysis of experimental assay data',
+  author=__authors__,
+  author_email='gnzng@protonmail.ch',
+  url='https://github.com/gnzng/',
+  keywords=['assay'],
+  install_requires=[
           'numpy',
           'pandas',
           'scipy',
