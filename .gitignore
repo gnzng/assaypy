@@ -10,4 +10,4 @@ assaypy.egg-info/
 
 dist/
 
-1_example.ipynb
+*.ipynb
