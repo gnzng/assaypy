@@ -143,23 +143,23 @@ def group_wells(dfs, dubtrip, mode='A1-A2'):
 
 # ATTACH MOL DATA
 
-def attach_cabp_mol(groups):
-    cabp_mol = dict()
+def attach_trip_mol(groups):
+    trip_mol = dict()
     for assay_name in list(groups):
         if (len(groups[assay_name][list(groups[assay_name])[0]])) == 2:
-            cabp_mol[assay_name] = dict()
+            trip_mol[assay_name] = dict()
             for gr in list(groups[assay_name]):
-                cabp_mol[assay_name][gr] = float(input('mol for {}?  '.format(gr)))
+                trip_mol[assay_name][gr] = float(input('mol for {}?  '.format(gr)))
     # export to json:
 
     save = input('save? (Y/n)')
     if save == 'Y':
         with open(input('save as filename (json): ') + '.json', "w") as outfile:
-            json.dump(cabp_mol, outfile)
+            json.dump(trip_mol, outfile)
         print('saved')
     else:
         pass
-    return cabp_mol
+    return trip_mol
 
 
 def change_assay_dubtrip(dfs1, dubtrip):
@@ -405,7 +405,64 @@ def plot_cabp_slopes(cabp_slopes,
                     print('baseline', _max_conc_slope)
                     plt.xlabel('concentration [µMol]')
                     plt.ylabel('absorption change [arb. units/s]')
-                    plt.legend()
+                    plt.legend(loc='lower left')
+                    plt.grid()
+                    plt.show()
+
+
+# TRIP data
+def plot_trip_slopes(trip_slopes,
+                     trip_mol,
+                     exclude=[],
+                     beta=1,
+                     epsilon=6220,
+                     plot_all_slopes=True
+                     ):
+    '''
+    trip_slopes     = dict with dA/dt data of the measured wells
+    trip_mol        = dict with concentration data for the measured wells usually in µMol
+    exclude         = list of string with assays or enzymes to exclude plotting
+    beta            = beta factor to correct measurement
+    epsilon         = molar absorbtivity
+    plot_all_slopes = plots the histogram of all collected slope data from previous analysis
+    '''
+
+    for assay in list(trip_slopes):
+        if assay not in exclude:
+            for enzyme in list(trip_slopes[assay]):
+                if enzyme not in exclude:
+
+                    wells_to_analyse = list(trip_slopes[assay][enzyme])
+
+                    plt.figure(figsize=(10, 7))
+                    plt.title(assay + ' | ' + enzyme)
+                    print(assay + ' | ' + enzyme)
+                    print('name, slope [see plot for units], well')
+                    for well in wells_to_analyse:
+                        if plot_all_slopes is True:
+                            if beta == 1:
+                                plt.scatter(np.array(np.ones(len(trip_slopes[assay][enzyme][well][1]))*trip_mol[assay][enzyme][well]), -1*(np.array(trip_slopes[assay][enzyme][well][1])), alpha=0.3, label=well + '|{}'.format(trip_mol[assay][enzyme][well]))
+                            else:
+                                try:
+                                    plt.scatter(np.array(np.ones(len(trip_slopes[assay][enzyme][well][1]))*trip_mol[assay][enzyme][well]), absorption_to_concentration(-1*np.array(np.array(trip_slopes[assay][enzyme][well][1])), beta, epsilon), alpha=0.3, label=well + '|{}'.format(trip_mol[assay][enzyme][well]))
+                                    print(np.array(np.ones(len(trip_slopes[assay][enzyme][well][1]))*trip_mol[assay][enzyme][well]), absorption_to_concentration(-1*np.array(np.array(trip_slopes[assay][enzyme][well][1])), beta, epsilon), label=well + '|{}'.format(trip_mol[assay][enzyme][well]))
+                                except Exception:
+                                    raise ValueError('beta must be a number')
+                        else:
+                            if beta == 1:
+                                plt.scatter(trip_mol[assay][enzyme][well], -1*trip_slopes[assay][enzyme][well][0], label=well + '|{}'.format(trip_mol[assay][enzyme][well]))
+                            else:
+                                try:
+                                    plt.scatter(trip_mol[assay][enzyme][well], absorption_to_concentration(-1*trip_slopes[assay][enzyme][well][0], beta, epsilon), label=well + '|{}'.format(trip_mol[assay][enzyme][well]))
+                                    print(trip_mol[assay][enzyme][well], absorption_to_concentration(-1*trip_slopes[assay][enzyme][well][0], beta, epsilon), str(well) + '|{}'.format(trip_mol[assay][enzyme][well]))
+                                except Exception:
+                                    raise ValueError('beta must be a number')
+                    if beta == 1:
+                        plt.ylabel('absorption change [arb. units/s]')
+                    else:
+                        plt.ylabel('absorption change [µmol/s]')
+                    plt.xlabel('concentration [µMol]')
+                    plt.legend(loc='upper left', ncols=3)
                     plt.grid()
                     plt.show()
 
@@ -431,3 +488,14 @@ def get_time_zero(df):
     diffs = np.diff(times)
     max_diffs = np.argmax(diffs)
     return times[max_diffs+1]
+
+
+def absorption_to_concentration(A, beta, epsilon=6220):
+    '''
+    epsilon in 1/mol/cm
+    beta in cm
+    returns c in µmol
+    '''
+    c = A/(beta*epsilon)/2  # 2 number of possible spaces
+    c = c * 1_000_000  # convert to µmol
+    return c
