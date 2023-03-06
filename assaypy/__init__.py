@@ -44,7 +44,7 @@ def excel_to_pandas(_file: str) -> dict:
                 for n in range(200):
                     df = pd.read_excel(_file, sheet_name=worksheet, skiprows=n)
                     if 'Time [s]' in list(df):
-                        print(worksheet, n)
+                        print(worksheet, n, 'header lines')
                         dfs[worksheet] = pd.read_excel(_file, sheet_name=worksheet, skiprows=n)
                         break
             except Exception:
