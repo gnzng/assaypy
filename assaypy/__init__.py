@@ -29,7 +29,7 @@ def path_to_xlsx(path):
 def excel_to_pandas(_file: str) -> dict:
     """
     return pandas dataframes workbook by workbooks for main data.
-    Load all datasheets from the excel file and trim first 49
+    Load all datasheets from the excel file and trim first
     rows bc of header, can be saved or extracted via another function
     trim last 10 rows, to exclude last NaNs
     """
