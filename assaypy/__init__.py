@@ -266,12 +266,18 @@ def analyse_all(dfs, interval: int = 100, time0: bool = True, endtime: int = Non
     return all_slopes, all_errors
 
 
-def plot_assays_and_slopes(dfs1, groups, slopes, errslo, exclude=[]):
+def plot_assays_and_slopes(dfs1,
+                           groups,
+                           slopes,
+                           errslo,
+                           show_average=True,
+                           exclude=[]):
     '''
     dfs1 = dataframe
     groups = grouping information about all assays
     slopes = slope data
     errslo = information about slope error
+    show_average = True -> plot with slope average
     exclude can be list of Assay names or dub/trip number
     '''
     for assay_to_plot in list(groups):
@@ -280,7 +286,10 @@ def plot_assays_and_slopes(dfs1, groups, slopes, errslo, exclude=[]):
             for n in list(groups[assay_to_plot]):
                 if len(groups[assay_to_plot][n]) not in exclude:
                     f, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
+                    f.set_figheight(5)
+                    f.set_figwidth(10)
                     plt.title(assay_to_plot + ' | ' + n)
+                    list_for_average_slope = list()
                     for m in groups[assay_to_plot][n]:
                         ax1.plot(dfs1[assay_to_plot]['Time [s]'],
                                  dfs1[assay_to_plot][m])
@@ -288,14 +297,24 @@ def plot_assays_and_slopes(dfs1, groups, slopes, errslo, exclude=[]):
                                      slopes[assay_to_plot][m],
                                      errslo[assay_to_plot][m],
                                      label=m)
+                        list_for_average_slope.append(slopes[assay_to_plot][m])
+                    # optional plot average:
+                    if show_average is True:
+
+                        _average_slopes = np.mean(list_for_average_slope)
+                        _std_slopes = np.std(list_for_average_slope)
+
+                        ax2.axhline(_average_slopes, label='avg', color='grey')
+                        ax2.axhspan(_average_slopes-_std_slopes, _average_slopes+_std_slopes,
+                                    color='grey', alpha=0.2, label='std')
                     plt.tight_layout()
                     ax2.set_xlabel('Time [s]')
                     ax1.set_ylabel('absorbance')
-                    ax2.set_ylabel('slope')
+                    ax2.set_ylabel('absorbance change [absorbance/s]')
                     ax1.grid()
                     ax2.grid()
                     plt.legend()
-                    plt.show()
+                    return plt.show()
 
 
 # CABP:
