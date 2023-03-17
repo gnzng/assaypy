@@ -1,12 +1,13 @@
 # assaypy
 
-# Table of Contents
+## table of contents
 
 1. [installation](#installation)
 2. [data import](#data-import)
-3. [quick look](#quick-look)
-4. [CABP data](#cabp-data)
-5. [FAQs](#faqs)
+3. [grouping](#grouping)
+4. [quick look](#quick-look)
+5. [CABP data](#cabp-data)
+6. [FAQs](#faqs)
 
 ## installation
 
@@ -99,10 +100,80 @@ print('removed assays:', remove_assays)
 >> '''removed assays: ['Assay 2 Shaking']'''
 ```
 
+## grouping
+
+Grouping is important to combine multiple wells into one unit for analysis and first impression. First attach information if an assay or worksheet is measured in duplicate or triplicate via the following function, a prompt will open and one can type in the right information
+
+```python
+dubtrip = attach_dubtrip(dfs)
+>>'''final:
+
+{'Assay 3 Shaking': 3, 'Assay 4 Shaking': 3}'''
+```
+
+Prompt for changing the attached duplicate or triplicate information via
+
+```python
+change_assay_dubtrip(dfs, dubtrip)
+```
+
+with that information the grouping can be done for all loaded assays or spreadsheets. Two modes are possible at the moment `'A1-A2'` and `'A1-B1'` for combining the wells.
+
+```python
+groups = group_wells(dfs, dubtrip, mode = 'A1-A2')
+```
+
+`groups` will be saved as simple `dict`s and can be changed manually by adressing the key value pairs.
+
 ## quick look
 
 If you don't want to do a whole procedure but are still interested in a quick look, this functions are now helpful for you:
 
+This section requires update to version 0.0.7:
+
+`analyse_all(dfs1, interval = 200, time0=True, endtime=1000)`
+
+`time0` if `True` starts slope analysis after reaction starts, guessing the start time of the reaction by the long break with no data aquisation. Instead of giving a boolean you can also give a starting time in seconds.
+
+With the exclude parameter one can exclude e.g. 'Assay 1 No Shaking' e.g. or 3 for exluding all triplicate analysis.
+
+Quick look at all the loaded assays:
+
+```python
+slopes, errslo = analyse_all(dfs1, interval = 100, time0 = 300, endtime = 2300)
+
+plot_assays_and_slopes(dfs,
+                       groups,
+                       slopes,
+                       errslo,
+                       show_average=True,
+                       exclude = [],
+                       )
+```
+
+will result in many plots of all the assays. Showing slopes and derivation with the above defined parameters like that:
+![Assay Slopes](img/assay_slopes.png)
+
+Plotting the average slopes of the shown curves above:
+
+```python
+plot_slope_values(groups, slopes)
+```
+
+![Assay Slope Values](img/assay_slope_values.png)
+
+The grey points in the plot mark the standard deviation of all averaged slope values from the group.
+
 ## CABP data
 
+tbd
+
 ## FAQs
+
+- 'How do I export the analysis or part of the analysis to Excel sheets?'
+
+```python
+export_to_excel(slopes,path='output1.xlsx')
+```
+
+from version 0.0.7
