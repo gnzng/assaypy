@@ -519,7 +519,43 @@ def absorption_to_concentration(A, beta, epsilon=6220):
     c = c * 1_000_000  # convert to µmol
     return c
 
+<<<<<<< HEAD
 def export_to_excel(slopes, path='output.xlsx'):
     with pd.ExcelWriter(path) as writer:  
         for assay in list(slopes):
             slopes[assay].to_excel(writer, sheet_name=assay)
+=======
+
+# extra dashboard functions:
+def plot_slope_values(groups,
+                      slopes,
+                      exclude=[]):
+    '''
+    groups = grouping information about all assays
+    slopes = slope data
+    exclude = subgroups to exclude
+    '''
+    for assay_to_plot in list(groups):
+        if assay_to_plot not in exclude:
+            print(assay_to_plot)
+            f, ax1 = plt.subplots(1, 1, sharex=True)
+            f.set_figheight(5)
+            f.set_figwidth(10)
+            plt.title(assay_to_plot)
+            for n in list(groups[assay_to_plot]):
+                if len(groups[assay_to_plot][n]) not in exclude:
+                    list_for_average_slope = list()
+                    for m in groups[assay_to_plot][n]:
+                        list_for_average_slope.append(slopes[assay_to_plot][m])
+
+                    _average_slopes = np.mean(list_for_average_slope)
+                    _std_slopes = np.std(list_for_average_slope)
+
+                    ax1.scatter(n, _average_slopes, label=n)
+                    ax1.scatter(n, _average_slopes-_std_slopes, color='grey', alpha=0.5)
+                    ax1.scatter(n, _average_slopes+_std_slopes, color='grey', alpha=0.5)
+                    plt.tight_layout()
+                    plt.legend(ncols=3)
+                    plt.xticks(rotation=90)
+        plt.show()
+>>>>>>> dashboard-functions
