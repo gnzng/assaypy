@@ -519,12 +519,10 @@ def absorption_to_concentration(A, beta, epsilon=6220):
     c = c * 1_000_000  # convert to µmol
     return c
 
-<<<<<<< HEAD
 def export_to_excel(slopes, path='output.xlsx'):
     with pd.ExcelWriter(path) as writer:  
         for assay in list(slopes):
             slopes[assay].to_excel(writer, sheet_name=assay)
-=======
 
 # extra dashboard functions:
 def plot_slope_values(groups,
@@ -558,4 +556,3 @@ def plot_slope_values(groups,
                     plt.legend(ncols=3)
                     plt.xticks(rotation=90)
         plt.show()
->>>>>>> dashboard-functions
