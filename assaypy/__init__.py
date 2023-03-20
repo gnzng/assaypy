@@ -318,6 +318,18 @@ def plot_assays_and_slopes(dfs1,
 
 
 # CABP:
+# duplicate list into wells, so each well can be modified
+def apply_to_all_wells(cabp_mol):
+    for assay in list(cabp_mol):
+        for enzyme in list(cabp_mol[assay]):
+            for wellpair in list(cabp_mol[assay][enzyme]):
+                for well in wellpair.split('-'):
+                    cabp_mol[assay][enzyme][well] = cabp_mol[assay][enzyme][wellpair]
+                if len(wellpair) > 3:
+                    del cabp_mol[assay][enzyme][wellpair]
+    return cabp_mol
+
+
 def analyse_cabp_slopes(dfs1,
                         groups,
                         cabp_mol,
