@@ -45,7 +45,7 @@ def excel_to_pandas(_file: str) -> dict:
                     df = pd.read_excel(_file, sheet_name=worksheet, skiprows=n)
                     if 'Time [s]' in list(df):
                         print(worksheet, n, 'header lines')
-                        dfs[worksheet] = pd.read_excel(_file, sheet_name=worksheet,skiprows=n)
+                        dfs[worksheet] = pd.read_excel(_file, sheet_name=worksheet, skiprows=n)
                         break
             except Exception:
                 print('couldnt resolve worksheet {}'.format(worksheet))
@@ -519,10 +519,12 @@ def absorption_to_concentration(A, beta, epsilon=6220):
     c = c * 1_000_000  # convert to µmol
     return c
 
+
 def export_to_excel(slopes, path='output.xlsx'):
-    with pd.ExcelWriter(path) as writer:  
+    with pd.ExcelWriter(path) as writer:
         for assay in list(slopes):
             slopes[assay].to_excel(writer, sheet_name=assay)
+
 
 # extra dashboard functions:
 def plot_slope_values(groups,
