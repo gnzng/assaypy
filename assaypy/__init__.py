@@ -4,6 +4,7 @@ import pandas as pd
 from scipy.stats import linregress
 import pprint
 import tqdm
+import warnings
 
 import json
 
@@ -29,7 +30,7 @@ def path_to_xlsx(path):
 def excel_to_pandas(_file: str) -> dict:
     """
     return pandas dataframes workbook by workbooks for main data.
-    Load all datasheets from the excel file and trim first 49
+    Load all datasheets from the excel file and trim first
     rows bc of header, can be saved or extracted via another function
     trim last 10 rows, to exclude last NaNs
     """
@@ -185,11 +186,10 @@ def change_assay_dubtrip(dfs1, dubtrip):
 # CHECKS and TESTS:
 
 
-def check_dataframe(dfs):
-    number_of_to_show = 9
+def check_dataframe(dfs, numbers_to_show=6):
     for n in dfs:
         print('Worksheet name: ', n)
-        print(dfs[n].describe().iloc[:, :number_of_to_show])
+        print(dfs[n].describe().iloc[:, :numbers_to_show])
         print('-------------------------------------------')
         print('-------------------------------------------')
 
@@ -266,12 +266,18 @@ def analyse_all(dfs, interval: int = 100, time0: bool = True, endtime: int = Non
     return all_slopes, all_errors
 
 
-def plot_assays_and_slopes(dfs1, groups, slopes, errslo, exclude=[]):
+def plot_assays_and_slopes(dfs1,
+                           groups,
+                           slopes,
+                           errslo,
+                           show_average=True,
+                           exclude=[]):
     '''
     dfs1 = dataframe
     groups = grouping information about all assays
     slopes = slope data
     errslo = information about slope error
+    show_average = True -> plot with slope average
     exclude can be list of Assay names or dub/trip number
     '''
     for assay_to_plot in list(groups):
@@ -280,7 +286,10 @@ def plot_assays_and_slopes(dfs1, groups, slopes, errslo, exclude=[]):
             for n in list(groups[assay_to_plot]):
                 if len(groups[assay_to_plot][n]) not in exclude:
                     f, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
+                    f.set_figheight(5)
+                    f.set_figwidth(10)
                     plt.title(assay_to_plot + ' | ' + n)
+                    list_for_average_slope = list()
                     for m in groups[assay_to_plot][n]:
                         ax1.plot(dfs1[assay_to_plot]['Time [s]'],
                                  dfs1[assay_to_plot][m])
@@ -288,22 +297,43 @@ def plot_assays_and_slopes(dfs1, groups, slopes, errslo, exclude=[]):
                                      slopes[assay_to_plot][m],
                                      errslo[assay_to_plot][m],
                                      label=m)
+                        list_for_average_slope.append(slopes[assay_to_plot][m])
+                    # optional plot average:
+                    if show_average is True:
+
+                        _average_slopes = np.mean(list_for_average_slope)
+                        _std_slopes = np.std(list_for_average_slope)
+
+                        ax2.axhline(_average_slopes, label='avg', color='grey')
+                        ax2.axhspan(_average_slopes-_std_slopes, _average_slopes+_std_slopes,
+                                    color='grey', alpha=0.2, label='std')
                     plt.tight_layout()
                     ax2.set_xlabel('Time [s]')
                     ax1.set_ylabel('absorbance')
-                    ax2.set_ylabel('slope')
+                    ax2.set_ylabel('absorbance change [absorbance/s]')
                     ax1.grid()
                     ax2.grid()
                     plt.legend()
                     plt.show()
 
 
-# CABP:
-def analyse_cabp_slopes(dfs1,
-                        groups,
-                        cabp_mol,
-                        slopes,
-                        errslo):
+# duplicate list into wells, so each well can be modified
+def apply_to_all_wells(cabp_mol):
+    for assay in list(cabp_mol):
+        for enzyme in list(cabp_mol[assay]):
+            for wellpair in list(cabp_mol[assay][enzyme]):
+                for well in wellpair.split('-'):
+                    cabp_mol[assay][enzyme][well] = cabp_mol[assay][enzyme][wellpair]
+                if len(wellpair) > 3:
+                    del cabp_mol[assay][enzyme][wellpair]
+    return cabp_mol
+
+
+def analyse_slopes(dfs1,
+                   groups,
+                   cabp_mol,
+                   slopes,
+                   errslo):
 
     cabp_slopes = dict()
     for assay in list(cabp_mol):
@@ -337,11 +367,21 @@ def analyse_cabp_slopes(dfs1,
     return cabp_slopes
 
 
-def plot_cabp_slopes(cabp_slopes,
-                     cabp_mol,
-                     exclude=[],
-                     plot_all_slopes=True
-                     ):
+def analyse_cabp_slopes(dfs1,
+                        groups,
+                        cabp_mol,
+                        slopes,
+                        errslo):
+    warnings.warn('analyse_cabp_slopes() was updated to analyse_slopes(). Please use analyse_slopes() instead from version 0.0.7.')
+    return analyse_slopes(dfs1, groups, cabp_mol, slopes, errslo)
+
+
+# CABP
+def plot_cabp_slope_values(cabp_slopes,
+                           cabp_mol,
+                           exclude=[],
+                           plot_all_slopes=True
+                           ):
     '''
     cabp_slopes     = dict with dA/dt data of the measured wells
     cabp_mol        = dict with concentration data for the measured wells usually in µMol
@@ -410,20 +450,29 @@ def plot_cabp_slopes(cabp_slopes,
                     plt.show()
 
 
-# TRIP data
-def plot_trip_slopes(trip_slopes,
-                     trip_mol,
+def plot_cabp_slopes(cabp_slopes,
+                     cabp_mol,
                      exclude=[],
-                     beta=1,
-                     epsilon=6220,
                      plot_all_slopes=True
                      ):
+    warnings.warn('plot_cabp_slopes() was updated to plot_cabp_slope_values(). Please use plot_cabp_slope_values() instead from version 0.0.7.')
+    return plot_cabp_slope_values(cabp_slopes, cabp_mol, exclude=[], plot_all_slopes=True)
+
+
+# TRIP data
+def plot_trip_slope_values(trip_slopes,
+                           trip_mol,
+                           exclude=[],
+                           beta=1,
+                           epsilon=6220,
+                           plot_all_slopes=True
+                           ):
     '''
     trip_slopes     = dict with dA/dt data of the measured wells
     trip_mol        = dict with concentration data for the measured wells usually in µMol
     exclude         = list of string with assays or enzymes to exclude plotting
     beta            = beta factor to correct measurement
-    epsilon         = molar absorbtivity
+    epsilon         = molar absorptivity
     plot_all_slopes = plots the histogram of all collected slope data from previous analysis
     '''
 
@@ -467,6 +516,17 @@ def plot_trip_slopes(trip_slopes,
                     plt.show()
 
 
+def plot_trip_slopes(trip_slopes,
+                     trip_mol,
+                     exclude=[],
+                     beta=1,
+                     epsilon=6220,
+                     plot_all_slopes=True
+                     ):
+    warnings.warn('plot_cabp_slopes() was updated to plot_cabp_slope_values(). Please use plot_cabp_slope_values() instead from version 0.0.7.')
+    return plot_trip_slope_values(trip_slopes, trip_mol, exclude=[], beta=1, epsilon=6220, plot_all_slopes=True)
+
+
 # UTIL FUNCTIONS:
 def print_data_structure(dfs):
     print('data structure with columns found:')
@@ -499,6 +559,12 @@ def absorption_to_concentration(A, beta, epsilon=6220):
     c = A/(beta*epsilon)/2  # 2 number of possible spaces
     c = c * 1_000_000  # convert to µmol
     return c
+
+
+def export_to_excel(slopes, path='output.xlsx'):
+    with pd.ExcelWriter(path) as writer:
+        for assay in list(slopes):
+            slopes[assay].to_excel(writer, sheet_name=assay)
 
 
 # extra dashboard functions:
