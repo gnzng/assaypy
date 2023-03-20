@@ -4,6 +4,7 @@ import pandas as pd
 from scipy.stats import linregress
 import pprint
 import tqdm
+import warnings
 
 import json
 
@@ -185,11 +186,10 @@ def change_assay_dubtrip(dfs1, dubtrip):
 # CHECKS and TESTS:
 
 
-def check_dataframe(dfs):
-    number_of_to_show = 9
+def check_dataframe(dfs, numbers_to_show=6):
     for n in dfs:
         print('Worksheet name: ', n)
-        print(dfs[n].describe().iloc[:, :number_of_to_show])
+        print(dfs[n].describe().iloc[:, :numbers_to_show])
         print('-------------------------------------------')
         print('-------------------------------------------')
 
@@ -317,12 +317,11 @@ def plot_assays_and_slopes(dfs1,
                     return plt.show()
 
 
-# CABP:
-def analyse_cabp_slopes(dfs1,
-                        groups,
-                        cabp_mol,
-                        slopes,
-                        errslo):
+def analyse_slopes(dfs1,
+                   groups,
+                   cabp_mol,
+                   slopes,
+                   errslo):
 
     cabp_slopes = dict()
     for assay in list(cabp_mol):
@@ -356,11 +355,21 @@ def analyse_cabp_slopes(dfs1,
     return cabp_slopes
 
 
-def plot_cabp_slopes(cabp_slopes,
-                     cabp_mol,
-                     exclude=[],
-                     plot_all_slopes=True
-                     ):
+def analyse_cabp_slopes(dfs1,
+                        groups,
+                        cabp_mol,
+                        slopes,
+                        errslo):
+    warnings.warn('analyse_cabp_slopes() was updated to analyse_slopes(). Please use analyse_slopes() instead from version 0.0.7.')
+    return analyse_slopes(dfs1, groups, cabp_mol, slopes, errslo)
+
+
+# CABP
+def plot_cabp_slope_values(cabp_slopes,
+                           cabp_mol,
+                           exclude=[],
+                           plot_all_slopes=True
+                           ):
     '''
     cabp_slopes     = dict with dA/dt data of the measured wells
     cabp_mol        = dict with concentration data for the measured wells usually in µMol
@@ -429,20 +438,29 @@ def plot_cabp_slopes(cabp_slopes,
                     plt.show()
 
 
-# TRIP data
-def plot_trip_slopes(trip_slopes,
-                     trip_mol,
+def plot_cabp_slopes(cabp_slopes,
+                     cabp_mol,
                      exclude=[],
-                     beta=1,
-                     epsilon=6220,
                      plot_all_slopes=True
                      ):
+    warnings.warn('plot_cabp_slopes() was updated to plot_cabp_slope_values(). Please use plot_cabp_slope_values() instead from version 0.0.7.')
+    return plot_cabp_slope_values(cabp_slopes, cabp_mol, exclude=[], plot_all_slopes=True)
+
+
+# TRIP data
+def plot_trip_slope_values(trip_slopes,
+                           trip_mol,
+                           exclude=[],
+                           beta=1,
+                           epsilon=6220,
+                           plot_all_slopes=True
+                           ):
     '''
     trip_slopes     = dict with dA/dt data of the measured wells
     trip_mol        = dict with concentration data for the measured wells usually in µMol
     exclude         = list of string with assays or enzymes to exclude plotting
     beta            = beta factor to correct measurement
-    epsilon         = molar absorbtivity
+    epsilon         = molar absorptivity
     plot_all_slopes = plots the histogram of all collected slope data from previous analysis
     '''
 
@@ -484,6 +502,17 @@ def plot_trip_slopes(trip_slopes,
                     plt.legend(loc='upper left', ncols=3)
                     plt.grid()
                     plt.show()
+
+
+def plot_trip_slopes(trip_slopes,
+                     trip_mol,
+                     exclude=[],
+                     beta=1,
+                     epsilon=6220,
+                     plot_all_slopes=True
+                     ):
+    warnings.warn('plot_cabp_slopes() was updated to plot_cabp_slope_values(). Please use plot_cabp_slope_values() instead from version 0.0.7.')
+    return plot_trip_slope_values(trip_slopes, trip_mol, exclude=[], beta=1, epsilon=6220, plot_all_slopes=True)
 
 
 # UTIL FUNCTIONS:
