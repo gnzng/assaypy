@@ -60,8 +60,52 @@ def excel_to_pandas(_file: str) -> dict:
     return dfs
 
 
-# GROUPING FUNCTIONS
+# dataframe handling
+def remove_assays(dfs, to_remove=[]):
+    '''
+    Removes Assays from dfs from list to_remove.
+    '''
+    if isinstance(to_remove, list) is not True:
+        raise ValueError('to_remove must be a list.')
 
+    if len(to_remove) == 0:
+        print('No assays to remove.')
+    else:
+        for i in to_remove:
+            if i in list(dfs):
+                try:
+                    del dfs[i]
+                    print('removed assays:', i)
+                except Exception:
+                    raise ValueError('could not find {}'.format(i))
+            else:
+                print(i, 'already removed or not in dict of dataframes.')
+
+
+def keep_assays(dfs, to_keep=[]):
+    '''
+    Keep only assays from dfs from list to_keep.
+    '''
+
+    if isinstance(to_keep, list) is not True:
+        raise ValueError('to_keep must be a list.')
+
+    if len(to_keep) == 0:
+        print('removed nothing. kept all')
+    else:
+        for i in list(dfs):
+            if i not in to_keep:
+                try:
+                    del dfs[i]
+                    print('removed assays:', i)
+
+                except Exception:
+                    raise ValueError('could not find {}'.format(i))
+            else:
+                print(i, 'already included')
+
+
+# GROUPING FUNCTIONS
 def attach_dubtrip(dfs1):
 
     dubtrip = dict()
@@ -523,7 +567,7 @@ def plot_trip_slopes(trip_slopes,
                      epsilon=6220,
                      plot_all_slopes=True
                      ):
-    warnings.warn('plot_cabp_slopes() was updated to plot_cabp_slope_values(). Please use plot_cabp_slope_values() instead from version 0.0.7.')
+    warnings.warn('plot_trip_slopes() was updated to plot_cabp_trip_values(). Please use plot_cabp_trip_values() instead from version 0.0.7.')
     return plot_trip_slope_values(trip_slopes, trip_mol, exclude=[], beta=1, epsilon=6220, plot_all_slopes=True)
 
 

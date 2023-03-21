@@ -1,4 +1,4 @@
-# assaypy
+# assaypy 🧑‍🔬🧪🧫
 
 ## table of contents
 
@@ -26,7 +26,7 @@ One can use cell magic in Jupyter notebook:
 update to latest version:
 
 ```python
-pip install -U assaypy
+pip install assaypy -U
 ```
 
 install specific version:
@@ -79,26 +79,21 @@ Assay 2 Shaking
 number of columns: 30'''
 ```
 
-### remove worksheets/assay from process
+### remove or keep worksheets/assay
 
 ```python
-print('tick box to remove Assays:')
-checkboxes = [widgets.Checkbox(value=False, description=label) for label in list(dfs)]
-display(widgets.VBox(children=checkboxes))
+keep_assays(dfs1, to_keep = ['Assay 2 Shaking', 'Assay 3 Shaking', 'Assay 4 Shaking'])
+remove_assays(dfs1, to_remove=['Assay 2 Shaking','Assay 3 Shaking'])
+
+>>>
+'''
+Assay 4 Shaking already included
+Assay 2 Shaking already removed or not in dict of dataframes.
+Assay 3 Shaking already removed or not in dict of dataframes.
+'''
 ```
 
 -> click boxes of assays to remove and proceed:
-
-```python
-remove_assays = []
-for i in range(0, len(checkboxes)):
-    if checkboxes[i].value == True:
-        remove_assays = remove_assays + [checkboxes[i].description]
-for n in remove_assays:
-     del dfs[n]
-print('removed assays:', remove_assays)
->> '''removed assays: ['Assay 2 Shaking']'''
-```
 
 ## grouping
 
@@ -209,7 +204,8 @@ cabp_mol = apply_to_all_wells(cabp_mol_groups)
 
 pprint.pprint(cabp_mol, sort_dicts=False)
 
->>> {'Assay 3 Shaking': {'Orange': {'E1': 0,
+>>>
+'''{'Assay 3 Shaking': {'Orange': {'E1': 0,
                                 'E2': 0,
                                 'E3': 0.5,
                                 'E4': 0.5,
@@ -249,6 +245,7 @@ pprint.pprint(cabp_mol, sort_dicts=False)
                                  'A10': 0.06,
                                  'A11': 0.03,
                                  'A12': 0.03}}}
+                                 '''
 ```
 
 ### show CABP slopes
@@ -269,9 +266,11 @@ plot_cabp_slope_values(cabp_slopes,
                        plot_all_slopes = True,
                        exclude = [])
 
->>> xintercept 0.023333333333333334
+>>> '''
+    xintercept 0.023333333333333334
     rvalue^2   0.9691002057008142
     baseline  -3.569725048362191e-05
+    '''
 ```
 
 ![CABP Slope Values](img/cabp_slope_values.png)
@@ -320,7 +319,8 @@ trip_samples = apply_to_all_wells(trip_samples_groups)
 
 pprint.pprint(trip_samples, sort_dicts=False )
 
->>> {'Assay 2 Shaking': {'Orange': {'A1': 'no',
+>>> '''
+    {'Assay 2 Shaking': {'Orange': {'A1': 'no',
                                 'A2': 'no',
                                 'A3': 'no',
                                 'A4': 'sub',
@@ -368,6 +368,7 @@ pprint.pprint(trip_samples, sort_dicts=False )
                                  'C10': 'high',
                                  'C11': 'high',
                                  'C12': 'high'}}}
+                                 '''
 ```
 
 Extract the slope values from the analysis:
@@ -390,6 +391,7 @@ plot_trip_slope_values(trip_slopes,
                  epsilon = 1)
 
 >>>
+'''
 Assay 2 Shaking | Orange
 name, slope [see plot for units], well
 no 1.1338438094204758e-05 A1|no
@@ -404,6 +406,7 @@ low 0.01128395516609605 B3|low
 high 0.03279805626924136 B4|high
 high 0.033197757118762924 B5|high
 high 0.03402891656950499 B6|high
+'''
 ```
 
 ![Trip Slope Values](img/trip_slope_values.png)
