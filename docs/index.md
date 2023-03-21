@@ -1,13 +1,14 @@
-# assaypy 🧑‍🔬🧪🧫
+# 🧑‍🔬🧪🧫
 
-## table of contents
+[https://github.com/gnzng/assaypy](https://github.com/gnzng/assaypy)
 
 1. [installation](#installation)
 2. [data import](#data-import)
 3. [grouping](#grouping)
 4. [quick look](#quick-look)
 5. [CABP data](#cabp-data)
-6. [FAQs](#faqs)
+6. [Triplet Data](#triplet-data)
+7. [FAQs](#faqs)
 
 ## installation
 
@@ -474,4 +475,4 @@ check_dataframe(dfs)
         -------------------------------------------
 ```
 
--> Docs for version 0.0.7
+**Documentation valid from version 0.0.7**

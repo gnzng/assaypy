@@ -105,51 +105,6 @@ def keep_assays(dfs, to_keep=[]):
                 print(i, 'already included')
 
 
-# dataframe handling
-def remove_assays(dfs, to_remove=[]):
-    '''
-    Removes Assays from dfs from list to_remove.
-    '''
-    if isinstance(to_remove, list) is not True:
-        raise ValueError('to_remove must be a list.')
-
-    if len(to_remove) == 0:
-        print('No assays to remove.')
-    else:
-        for i in to_remove:
-            if i in list(dfs):
-                try:
-                    del dfs[i]
-                    print('removed assays:', i)
-                except Exception:
-                    raise ValueError('could not find {}'.format(i))
-            else:
-                print(i, 'already removed or not in dict of dataframes.')
-
-
-def keep_assays(dfs, to_keep=[]):
-    '''
-    Keep only assays from dfs from list to_keep.
-    '''
-
-    if isinstance(to_keep, list) is not True:
-        raise ValueError('to_keep must be a list.')
-
-    if len(to_keep) == 0:
-        print('removed nothing. kept all')
-    else:
-        for i in list(dfs):
-            if i not in to_keep:
-                try:
-                    del dfs[i]
-                    print('removed assays:', i)
-
-                except Exception:
-                    raise ValueError('could not find {}'.format(i))
-            else:
-                print(i, 'already included')
-
-
 # GROUPING FUNCTIONS
 def attach_dubtrip(dfs1):
 
@@ -402,7 +357,7 @@ def plot_assays_and_slopes(dfs1,
                     ax2.set_ylabel('absorbance change [absorbance/s]')
                     ax1.grid()
                     ax2.grid()
-                    plt.legend()
+                    plt.legend(ncols=2, bbox_to_anchor=(1, 0.5))
                     plt.show()
 
 
@@ -451,7 +406,7 @@ def analyse_slopes(dfs1,
                         plt.plot([get_time_zero(dfs1[assay]), get_time_zero(dfs1[assay])],
                                  [np.min(slopes[assay][well]), np.max(slopes[assay][well])],
                                  color='grey', label='time 0')
-                        plt.legend()
+                        plt.legend(ncols=2, bbox_to_anchor=(1, 0.5))
                         plt.show()
     return cabp_slopes
 
@@ -534,7 +489,7 @@ def plot_cabp_slope_values(cabp_slopes,
                     print('baseline', _max_conc_slope)
                     plt.xlabel('concentration [µMol]')
                     plt.ylabel('absorption change [arb. units/s]')
-                    plt.legend(loc='lower left')
+                    plt.legend(ncols=2, bbox_to_anchor=(1, 0.5))
                     plt.grid()
                     plt.show()
 
@@ -600,7 +555,7 @@ def plot_trip_slope_values(trip_slopes,
                     else:
                         plt.ylabel('absorption change [µmol/s]')
                     plt.xlabel('concentration [µMol]')
-                    plt.legend(loc='upper left', ncols=3)
+                    plt.legend(ncols=2, bbox_to_anchor=(1, 0.5))
                     plt.grid()
                     plt.show()
 
@@ -685,6 +640,6 @@ def plot_slope_values(groups,
                     ax1.scatter(n, _average_slopes-_std_slopes, color='grey', alpha=0.5)
                     ax1.scatter(n, _average_slopes+_std_slopes, color='grey', alpha=0.5)
                     plt.tight_layout()
-                    plt.legend(ncols=3)
+                    plt.legend(ncols=2, bbox_to_anchor=(1, 0.5))
                     plt.xticks(rotation=90)
         plt.show()
