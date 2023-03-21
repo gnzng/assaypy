@@ -1,6 +1,6 @@
 from distutils.core import setup
 __authors__ = 'Damian Guenzing'
-__version__ = '0.0.6'
+__version__ = '0.0.7'
 
 setup(
   name='assaypy',
