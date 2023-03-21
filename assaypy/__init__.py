@@ -612,7 +612,7 @@ def plot_trip_slopes(trip_slopes,
                      epsilon=6220,
                      plot_all_slopes=True
                      ):
-    warnings.warn('plot_trip_slopes() was updated to plot_cabp_trip_values(). Please use plot_cabp_trip_values() instead from version 0.0.7.')
+    warnings.warn('plot_trip_slopes() was updated to plot_trip_slope_values(). Please use plot_trip_slope_values() instead from version 0.0.7.')
     return plot_trip_slope_values(trip_slopes, trip_mol, exclude=[], beta=1, epsilon=6220, plot_all_slopes=True)
 
 
