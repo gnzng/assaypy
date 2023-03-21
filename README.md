@@ -1,4 +1,6 @@
 # assaypy 🧑‍🔬🧪🧫
+[![DOI](https://zenodo.org/badge/593362841.svg)](https://zenodo.org/badge/latestdoi/593362841)
+
 
 ## summary
 
