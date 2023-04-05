@@ -417,7 +417,7 @@ high 0.03402891656950499 B6|high
 Calculate concentration from absorption via `absorption_to_concentration()`:
 
 $$ C(A,\beta,\epsilon) = \frac{A}{\beta \cdot \epsilon} \cdot \frac{1}{2} \cdot 10^6 \text{µmol}$$
-where, $\beta$ is a factor to correct measurement in 1/(mol $\cdot$ cm), and $\epsilon$ is molar absorptivity in cm. The factor $\frac{1}{2}$ was used because of two . $10^6$ was used to convert to µmol.
+where, $\beta$ is a factor to correct measurement in 1/(mol $\cdot$ cm), and $\epsilon$ is molar absorptivity in cm. The factor $\frac{1}{2}$ was used because for every molecule of RuBP consumed, two molecules of 3PGA ar produced resulting in the oxidation of two NADH molecules. $10^6$ was used to convert to µmol.
 
 ## FAQs
 
